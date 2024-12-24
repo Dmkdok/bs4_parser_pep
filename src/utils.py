@@ -33,8 +33,9 @@ def get_soup(session, url):
         response = get_response(session, url)
         response.encoding = 'utf-8'
         return BeautifulSoup(response.text, 'lxml')
-    except requests.RequestException:
-        return None
+    except requests.RequestException as e:
+        logging.error(f"Ошибка при получении soup с {url}: {e}")
+        raise
 
 
 def find_tag(soup, tag_name, attrs=None):
@@ -54,7 +55,7 @@ def get_pep_status(session, pep_url_suffix):
     pep_page = get_soup(session, urljoin(PEP_URL, pep_url_suffix))
     pep_content_section = find_tag(pep_page, 'section', {'id': 'pep-content'})
     pep_content_html = str(pep_content_section.dl)
-    pep_content_soup = BeautifulSoup(pep_content_html, 'html.parser')
+    pep_content_soup = BeautifulSoup(pep_content_html, 'lxml')
     status_dd_tag = pep_content_soup.select_one(
         'dt:-soup-contains("Status") + dd'
     )
