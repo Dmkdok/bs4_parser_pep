@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from argparse import Namespace
 try:
-    from src import output
+    from src import outputs
 except ModuleNotFoundError:
     assert False, 'Убедитесь что в директории `src` есть файл `outputs.py`'
 except ImportError:
@@ -22,7 +22,7 @@ def cli_args(mode: str, output_format: Optional[str]) -> Namespace:
 ])
 def test_control_output_default(capsys, records, cli_arg):
     records = records(cli_arg.mode)
-    output.control_output(records, cli_arg)
+    outputs.control_output(records, cli_arg)
     captured_out, _ = capsys.readouterr()
     if cli_arg.mode == 'pep':
         records = '\n'.join([f'{k} {v}' for k, v in records])
@@ -38,7 +38,7 @@ def test_control_output_default(capsys, records, cli_arg):
 ])
 def test_control_output_pretty(capsys, records, cli_arg, part_output):
     records = records(cli_arg.mode)
-    output.control_output(records, cli_arg)
+    outputs.control_output(records, cli_arg)
     captured_out, _ = capsys.readouterr()
     assert '------' in captured_out, f'Проверьте вывод в консоль для {cli_arg}'
     assert part_output in captured_out, (
@@ -53,10 +53,10 @@ def test_control_output_pretty(capsys, records, cli_arg, part_output):
 ])
 def test_control_output_file(monkeypatch, tmp_path, records, cli_arg):
     mock_base_dir = Path(tmp_path)
-    monkeypatch.setattr(output, 'BASE_DIR', mock_base_dir)
+    monkeypatch.setattr(outputs, 'BASE_DIR', mock_base_dir)
 
     records = records(cli_arg.mode)
-    output.control_output(records, cli_arg)
+    outputs.control_output(records, cli_arg)
     dirs = [
         directory.name for directory in mock_base_dir.iterdir()
         if directory.is_dir()
@@ -81,12 +81,12 @@ def test_control_output_file(monkeypatch, tmp_path, records, cli_arg):
 
 
 def test_output_file():
-    assert hasattr(output, 'control_output'), (
+    assert hasattr(outputs, 'control_output'), (
         'Напишите функцию `control_output` в модуле `output.py`'
     )
-    assert hasattr(output, 'pretty_output'), (
+    assert hasattr(outputs, 'pretty_output'), (
         'Напишите функцию `pretty_output` в модуле `output.py`'
     )
-    assert hasattr(output, 'file_output'), (
+    assert hasattr(outputs, 'file_output'), (
         'Напишите функцию `file_output` в модуле `output.py`'
     )

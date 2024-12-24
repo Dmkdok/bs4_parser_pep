@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
 from constants import BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, PEP_URL
-from output import control_output
+from outputs import control_output
 from exceptions import VersionsNotFound
 from utils import find_tag, get_pep_status, get_soup
 
