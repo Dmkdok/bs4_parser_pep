@@ -129,6 +129,7 @@ def pep(session):
     pep_table_bodies = pep_table_section.find_all('tbody')
     pep_status_counts = defaultdict(int)
     results = [('Статус', 'Количество')]
+    log_messages = []
 
     for table_body in tqdm(pep_table_bodies):
         rows = table_body.find_all('tr')
@@ -138,18 +139,27 @@ def pep(session):
             pep_status_preview = cells[0].text[1:]
             pep_relative_link = cells[1].a['href']
             pep_full_status = get_pep_status(session, pep_relative_link)
-            expected_statuses = EXPECTED_STATUS[pep_status_preview]
-            if pep_full_status not in expected_statuses:
-                logging.info(
+            expected_statuses = EXPECTED_STATUS.get(pep_status_preview)
+            if expected_statuses is None:
+                log_messages.append(
+                    f'Неизвестный статус: {pep_status_preview}\n'
+                    f'{urljoin(PEP_URL, pep_relative_link)}\n'
+                    f'Статус в карточке: {pep_full_status}'
+                )
+            elif pep_full_status not in expected_statuses:
+                log_messages.append(
                     'Несовпадающие статусы:\n'
                     f'{urljoin(PEP_URL, pep_relative_link)}\n'
                     f'Статус в карточке: {pep_full_status}\n'
                     f'Ожидаемые статусы: {expected_statuses}'
                 )
+
             pep_status_counts[pep_full_status] += 1
 
-    for status, count in pep_status_counts.items():
-        results.append((status, count))
+    if log_messages:
+        logging.info('\n'.join(log_messages))
+    status_count_pairs = list(pep_status_counts.items())
+    results.extend(status_count_pairs)
     results.append(('Total', sum(pep_status_counts.values())))
 
     return results
